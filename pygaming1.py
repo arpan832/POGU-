@@ -14,14 +14,17 @@ ground_surface = pg.image.load('E:\pygame\Graphics/platform2.png').convert_alpha
 text_surface = test_font.render("Score:: ",False,'Black')
 text_rectangle = text_surface.get_rect(midbottom=(550,50))
 snail_surface =pg.image.load("E:\pygame\Graphics/snailWalk1.png").convert_alpha()
-snail_x_pos = 300
+snail_x_pos = 800
 snail_rectangle = snail_surface.get_rect(midbottom=(snail_x_pos,500))
 over_surface = test_font.render("GAME OVER ",False,'Black')
-over_rectangle = text_surface.get_rect(midbottom=(550,100))
+over_rectangle = text_surface.get_rect(midbottom=(500,100))
+restart_surface = test_font.render("press 1 to restart",False,'Black')
+restart_rectangle = restart_surface.get_rect(midbottom=(550,150))  
 player_surface = pg.image.load("E:\pygame\Graphics/charecter.png").convert_alpha()
 player_rectangle = player_surface.get_rect(midbottom = (200,500))
 player_gravity = 0 
 player_forward = 0
+
 game_active = True 
  ## we need a loop to make the surface stay forever 
 while True:
@@ -36,7 +39,7 @@ while True:
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_w and player_rectangle.bottom >= 500:
                player_gravity = -20
-            if event.key == pg.K_SPACE  :
+            if event.key == pg.K_SPACE and player_rectangle.bottom >= 500:
                  player_gravity = -25
         if event.type == pg.KEYDOWN:
              if event.key == pg.K_d :
@@ -46,7 +49,16 @@ while True:
         if event.type == pg.KEYUP: 
             if event.key in [pg.K_d, pg.K_a]:
                 player_forward = 0        
-   ## update update everthing 
+        if event.type == pg.KEYDOWN: 
+            if event.key == pg.K_1:
+                 snail_rectangle.x = 800
+                 player_rectangle.x = 200  
+                 
+                            
+                 game_active = True
+                
+                    
+   ## update update everthing  
     if game_active:
       screen.blit(sky_surface,(0,0))
       screen.blit(ground_surface,(0,500))
@@ -68,7 +80,11 @@ while True:
   
     ##collide 
       if snail_rectangle.colliderect(player_rectangle):
-             screen.blit(over_surface,over_rectangle)         
+             pg.draw.rect(screen,'white',over_rectangle,1)
+             screen.blit(over_surface,over_rectangle)
+             pg.draw.rect(screen,'White',restart_rectangle,1)
+             screen.blit(restart_surface,restart_rectangle)
+             game_active = False          
     
     pg.display.update()
     clock.tick(60)
