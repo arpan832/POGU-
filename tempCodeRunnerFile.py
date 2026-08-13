@@ -1,1 +1,1 @@
-test
+game_active = False  
