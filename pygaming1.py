@@ -61,7 +61,7 @@ score = 0
 
 pg.mixer.music.load("background.mp3")
 music_playing = False
-
+...
 
  ## we need a loop to make the surface stay forever 
 while True:
