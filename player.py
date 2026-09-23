@@ -1,7 +1,7 @@
 """Player sprite and movement mechanics."""
 import pygame as pg
 
-from game_settings import GROUND_Y, PLAYER_SPEED, SCREEN_WIDTH
+from game_settings import GRAVITY, GROUND_Y, JUMP_SPEED, PLAYER_SPEED
 
 
 class Player(pg.sprite.Sprite):
@@ -14,30 +14,34 @@ class Player(pg.sprite.Sprite):
         self.player_flipped = pg.transform.flip(image, True, False)
         self.player_index = 0
         self.image = self.player_walk[0]
-        self.rect = self.image.get_rect(midbottom=(200, GROUND_Y))
+        self.rect = self.image.get_rect(midbottom=(180, GROUND_Y))
         self.gravity = 0
         self.speed = PLAYER_SPEED
         self.startup_sound = startup_sound
+        self.facing_right = True
+        self.on_ground = False
 
-    def player_input(self):
-        keys = pg.key.get_pressed()
-        if (keys[pg.K_SPACE] or keys[pg.K_w]) and self.rect.bottom >= GROUND_Y:
-            self.gravity = -25 if keys[pg.K_SPACE] else -20
+    def player_input(self, keys):
+        if (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and self.on_ground:
+            self.gravity = JUMP_SPEED
+            self.on_ground = False
             if self.startup_sound:
                 self.startup_sound.play()
-        if keys[pg.K_d]:
-            self.rect.x += self.speed
-        if keys[pg.K_a]:
-            self.rect.x -= self.speed
-        self.rect.left = max(0, self.rect.left)
-        self.rect.right = min(SCREEN_WIDTH, self.rect.right)
+        dx = (keys[pg.K_d] or keys[pg.K_RIGHT]) - (keys[pg.K_a] or keys[pg.K_LEFT])
+        self.rect.x += dx * self.speed
+        if dx:
+            self.facing_right = dx > 0
 
-    def apply_gravity(self):
-        self.gravity += 1
+    def apply_gravity(self, solids):
+        self.gravity += GRAVITY
         self.rect.y += self.gravity
-        if self.rect.bottom >= GROUND_Y:
-            self.rect.bottom = GROUND_Y
-            self.gravity = 0
+        self.on_ground = False
+        for solid in solids:
+            if self.rect.colliderect(solid) and self.gravity >= 0:
+                self.rect.bottom = solid.top
+                self.gravity = 0
+                self.on_ground = True
+                break
 
     def animate(self):
         if self.rect.bottom < GROUND_Y:
@@ -45,13 +49,15 @@ class Player(pg.sprite.Sprite):
         else:
             self.player_index = (self.player_index + 0.1) % len(self.player_walk)
             self.image = self.player_walk[int(self.player_index)]
+        if not self.facing_right:
+            self.image = pg.transform.flip(self.image, True, False)
 
     def reset_position(self):
-        self.rect.midbottom = (200, GROUND_Y)
+        self.rect.midbottom = (180, GROUND_Y)
         self.gravity = 0
+        self.on_ground = False
 
-    def update(self):
-        self.player_input()
-        self.apply_gravity()
+    def update(self, keys, solids):
+        self.player_input(keys)
+        self.apply_gravity(solids)
         self.animate()
-

@@ -7,9 +7,9 @@ from game_settings import BASE_DIR
 def load_audio():
     try:
         return {
-            "startup": pg.mixer.Sound(str(BASE_DIR / "realstartup.wav")),
-            "game_over": pg.mixer.Sound(str(BASE_DIR / "gameover.wav")),
-            "music": BASE_DIR / "background.mp3",
+            "startup": pg.mixer.Sound(str(BASE_DIR / "realstartup.ogg")),
+            "game_over": pg.mixer.Sound(str(BASE_DIR / "gameover.ogg")),
+            "music": BASE_DIR / "background.ogg",
         }
     except (FileNotFoundError, pg.error) as error:
         print(f"Audio files missing or unable to load: {error}")
@@ -26,8 +26,8 @@ def start_music(audio):
             pass
 
 
-def stop_music(audio):
-    pg.mixer.music.stop()
-    if audio["game_over"]:
+def stop_music(audio, play_game_over=True):
+    if pg.mixer.get_init():
+        pg.mixer.music.stop()
+    if play_game_over and audio["game_over"]:
         audio["game_over"].play()
-

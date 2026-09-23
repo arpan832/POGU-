@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+web/
+__pycache__/
+*.pyc
+*.wav
+*.mp3
